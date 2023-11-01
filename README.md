@@ -25,8 +25,8 @@ This repository contains minimal packages to control the scout robot using ROS.
     ```
     $ mkdir -p ~/ros2_ws/src
     $ cd ~/ros2_ws/src
-    $ git clone https://github.com/westonrobot/ugv_sdk.git
-    $ git clone https://github.com/westonrobot/scout_ros2.git
+    $ git clone https://github.com/agilexrobotics/ugv_sdk.git
+    $ git clone https://github.com/agilexrobotics/scout_ros2.git
     $ cd ..
     $ colcon build
     ```
