@@ -33,6 +33,12 @@ This repository contains minimal packages to control the scout robot using ROS.
 
 2. Launch ROS nodes
  
+* Enable can for the Scout robot
+
+    ```
+    $ sudo ip link set can0 up type can bitrate 500000
+    ```
+ 
 * Start the base node for the Scout robot
 
     ```
