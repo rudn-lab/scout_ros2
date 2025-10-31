@@ -10,25 +10,24 @@
 #ifndef SCOUT_MESSENGER_HPP
 #define SCOUT_MESSENGER_HPP
 
-#include <string>
-#include <mutex>
 #include <memory>
+#include <mutex>
+#include <string>
 
-#include <rclcpp/rclcpp.hpp>
-#include <nav_msgs/msg/odometry.hpp>
 #include <geometry_msgs/msg/twist.hpp>
-#include <tf2_ros/transform_broadcaster.h>
+#include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_broadcaster.h>
 
-#include "scout_msgs/msg/scout_status.hpp"
 #include "scout_msgs/msg/scout_light_cmd.hpp"
+#include "scout_msgs/msg/scout_status.hpp"
 
 #include "ugv_sdk/mobile_robot/scout_robot.hpp"
 
 namespace westonrobot {
-template <typename ScoutType>
-class ScoutMessenger {
- public:
+template <typename ScoutType> class ScoutMessenger {
+public:
   ScoutMessenger(std::shared_ptr<ScoutType> scout, rclcpp::Node *node)
       : scout_(scout), node_(node) {}
 
@@ -42,6 +41,7 @@ class ScoutMessenger {
   }
 
   void SetupSubscription() {
+    std::cout << "Setting up subscription." << std::endl;
     // odometry publisher
     odom_pub_ =
         node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 50);
@@ -62,6 +62,7 @@ class ScoutMessenger {
   }
 
   void PublishStateToROS() {
+    std::cout << "Publishing state." << std::endl;
     current_time_ = node_->get_clock()->now();
 
     static bool init_run = true;
@@ -129,7 +130,7 @@ class ScoutMessenger {
     last_time_ = current_time_;
   }
 
- private:
+private:
   std::shared_ptr<ScoutType> scout_;
   rclcpp::Node *node_;
 
@@ -193,23 +194,23 @@ class ScoutMessenger {
         uint8_t f_value;
 
         switch (msg->front_mode) {
-          case scout_msgs::msg::ScoutLightCmd::LIGHT_CONST_OFF: {
-            f_mode = AgxLightMode::CONST_OFF;
-            break;
-          }
-          case scout_msgs::msg::ScoutLightCmd::LIGHT_CONST_ON: {
-            f_mode = AgxLightMode::CONST_ON;
-            break;
-          }
-          case scout_msgs::msg::ScoutLightCmd::LIGHT_BREATH: {
-            f_mode = AgxLightMode::BREATH;
-            break;
-          }
-          case scout_msgs::msg::ScoutLightCmd::LIGHT_CUSTOM: {
-            f_mode = AgxLightMode::CUSTOM;
-            f_value = msg->front_custom_value;
-            break;
-          }
+        case scout_msgs::msg::ScoutLightCmd::LIGHT_CONST_OFF: {
+          f_mode = AgxLightMode::CONST_OFF;
+          break;
+        }
+        case scout_msgs::msg::ScoutLightCmd::LIGHT_CONST_ON: {
+          f_mode = AgxLightMode::CONST_ON;
+          break;
+        }
+        case scout_msgs::msg::ScoutLightCmd::LIGHT_BREATH: {
+          f_mode = AgxLightMode::BREATH;
+          break;
+        }
+        case scout_msgs::msg::ScoutLightCmd::LIGHT_CUSTOM: {
+          f_mode = AgxLightMode::CUSTOM;
+          f_value = msg->front_custom_value;
+          break;
+        }
         }
         scout_->SetLightCommand(f_mode, f_value, AgxLightMode::CONST_ON, 0);
       } else {
@@ -227,6 +228,7 @@ class ScoutMessenger {
   }
 
   void PublishOdometryToROS(const MotionStateMessage &msg, double dt) {
+    std::cout << "Publishing odometry to ROS." << std::endl;
     // perform numerical integration to get an estimation of pose
     double linear_speed = msg.linear_velocity;
     double angular_speed = msg.angular_velocity;
@@ -277,9 +279,10 @@ class ScoutMessenger {
     odom_msg.twist.twist.linear.y = lateral_speed;
     odom_msg.twist.twist.angular.z = angular_speed;
 
+    std::cout << "Before publish." << std::endl;
     odom_pub_->publish(odom_msg);
   }
 };
-}  // namespace westonrobot
+} // namespace westonrobot
 
 #endif /* SCOUT_MESSENGER_HPP */
