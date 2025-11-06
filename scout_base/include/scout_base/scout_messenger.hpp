@@ -62,7 +62,6 @@ public:
   }
 
   void PublishStateToROS() {
-    std::cout << "Publishing state." << std::endl;
     current_time_ = node_->get_clock()->now();
 
     static bool init_run = true;
@@ -168,7 +167,7 @@ private:
       std::lock_guard<std::mutex> guard(twist_mutex_);
       current_twist_ = *msg.get();
     }
-    // ROS_INFO("Cmd received:%f, %f", msg->linear.x, msg->angular.z);
+    RCLCPP_INFO(node_->get_logger(), "Cmd received:%f, %f", msg->linear.x, msg->angular.z);
   }
 
   template <typename T,
@@ -228,7 +227,6 @@ private:
   }
 
   void PublishOdometryToROS(const MotionStateMessage &msg, double dt) {
-    std::cout << "Publishing odometry to ROS." << std::endl;
     // perform numerical integration to get an estimation of pose
     double linear_speed = msg.linear_velocity;
     double angular_speed = msg.angular_velocity;
@@ -279,7 +277,6 @@ private:
     odom_msg.twist.twist.linear.y = lateral_speed;
     odom_msg.twist.twist.angular.z = angular_speed;
 
-    std::cout << "Before publish." << std::endl;
     odom_pub_->publish(odom_msg);
   }
 };

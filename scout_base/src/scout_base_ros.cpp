@@ -13,6 +13,8 @@
 #include "ugv_sdk/utilities/protocol_detector.hpp"
 
 namespace westonrobot {
+
+
 ScoutBaseRos::ScoutBaseRos(std::string node_name)
     : rclcpp::Node(node_name), keep_running_(false) {
   this->declare_parameter("port_name", rclcpp::ParameterValue("can0"));
@@ -152,11 +154,12 @@ void ScoutBaseRos::Run() {
     // publish robot state at 50Hz while listening to twist commands
     messenger->SetupSubscription();
     keep_running_ = true;
-    rclcpp::Rate rate(50);
+    rclcpp::Rate rate(50, this->get_clock());
     while (keep_running_) {
       messenger->PublishStateToROS();
       rclcpp::spin_some(shared_from_this());
-      rate.sleep();
+      // rate.sleep();
+      this->get_clock()->sleep_for(rclcpp::Duration(0, 20000000));
     }
   } else {
     std::unique_ptr<ScoutMessenger<ScoutMiniOmniRobot>> messenger =
