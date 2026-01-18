@@ -6,11 +6,6 @@
     <xacro:arg name="robot_namespace" default="/" />
     <xacro:arg name="urdf_extras" default="empty.urdf" />
 
-    <xacro:include filename="$(find scout_description)/urdf/scout_mini_wheel_1.xacro" />
-    <xacro:include filename="$(find scout_description)/urdf/scout_mini_wheel_2.xacro" />
-    <xacro:include filename="$(find scout_description)/urdf/scout_mini_wheel_3.xacro" />
-    <xacro:include filename="$(find scout_description)/urdf/scout_mini_wheel_4.xacro" />
-
     <!-- Variables -->
     <xacro:property name="M_PI" value="3.14159"/>
 
@@ -190,26 +185,11 @@
         <child link="camera_link" />
     </joint>
 
-    <link name="inertial_link">
+    <!-- <link name="inertial_link">
         <inertial>
             <mass value="132.3898489950015" />
             <origin xyz=" 0 0 0" />
             <inertia ixx="0.185196122711036" ixy="4.30144213829512E-08" ixz="5.81037523686401E-08" iyy="0.364893736238929" iyz="-0.000386720198091934" izz="0.223868521722778" />
-        </inertial>
-    </link>
-
-    <joint name="inertial_joint" type="fixed">
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <parent link="base_link" />
-        <child link="inertial_link" />
-    </joint>
-
-<!-- 
-    <link name="inertial_link">
-        <inertial>
-            <mass value="60" />
-            <origin xyz="0.0 0.0 0.0" />
-            <inertia ixx="2.288641" ixy="0" ixz="0" iyy="5.103976" iyz="0" izz="3.431465" />
         </inertial>
     </link>
 
@@ -227,33 +207,115 @@
         <child link="base_link"/>
     </joint> -->
 
-    <!-- Scout wheel macros -->
-    <!-- wheel labeled from 0 to 3, conter-clockwise, starting from front right wheel -->
-    <!-- motor 1 and 2 (left side) are mechanically installed in a reversed direction -->
-    <xacro:scout_mini_wheel_1 wheel_prefix="front_left" wheel_diameter="${wheel_diameter}" wheel_width="${wheel_width}">
-    <!--<origin
-            xyz="0 0 0"
-            rpy="0 0 0" />-->
-        <origin xyz="${wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="-1.57 0 0" />
-    </xacro:scout_mini_wheel_1>
-    <xacro:scout_mini_wheel_2 wheel_prefix="rear_left" wheel_diameter="${wheel_diameter}" wheel_width="${wheel_width}">
-    <!--<origin
-            xyz="0 0 0"
-            rpy="0 0 0" />-->
-        <origin xyz="${-wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="-1.57 0 0" />
-    </xacro:scout_mini_wheel_2>
-    <xacro:scout_mini_wheel_3 wheel_prefix="front_right" wheel_diameter="${wheel_diameter}" wheel_width="${wheel_width}">
-    <!--<origin
-            xyz="0 0 0"
-            rpy="0 0 0" />-->
-        <origin xyz="${wheelbase/2} ${-track/2} ${wheel_vertical_offset+0.001}" rpy="1.57 0 0" />
-    </xacro:scout_mini_wheel_3>
-    <xacro:scout_mini_wheel_4 wheel_prefix="rear_right" wheel_diameter="${wheel_diameter}" wheel_width="${wheel_width}">
-    <!--<origin
-           xyz="0 0 0"
-           rpy="0 0 0" />-->
-        <origin xyz="${-wheelbase/2} ${-track/2} ${wheel_vertical_offset+0.001}" rpy="1.57 0 0" />
-    </xacro:scout_mini_wheel_4>
+    <!-- Scout wheel -->
+    <link name="front_right_wheel_link">
+        <inertial>
+            <mass value="3" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="0.7171" ixy="0" ixz="0" iyy="0.7171" iyz="0" izz="0.1361" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="front_right_wheel" type="continuous">
+        <origin rpy="1.57 0 0" xyz="0.2319755 -0.2082515 -0.099998" />
+        <parent link="base_link" />
+        <child link="front_right_wheel_link" />
+        <axis xyz="0 0 -1" rpy="0 0 0" />
+    </joint>
+
+    <link name="front_left_wheel_link">
+        <inertial>
+            <mass value="3" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="0.7171" ixy="0" ixz="0" iyy="0.7171" iyz="0" izz="0.1361" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="front_left_wheel" type="continuous">
+        <origin rpy="-1.57 0 0" xyz="0.2319755 0.2082515 -0.100998" />
+        <parent link="base_link" />
+        <child link="front_left_wheel_link" />
+        <axis xyz="0 0 1" rpy="0 0 0" />
+    </joint>
+
+    <link name="rear_right_wheel_link">
+        <inertial>
+            <mass value="3" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="0.7171" ixy="0" ixz="0" iyy="0.7171" iyz="0" izz="0.1361" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="rear_right_wheel" type="continuous">
+        <origin rpy="1.57 0 0" xyz="-0.2319755 -0.2082515 -0.099998" />
+        <parent link="base_link" />
+        <child link="rear_right_wheel_link" />
+        <axis xyz="0 0 -1" rpy="0 0 0" />
+    </joint>
+
+    <link name="rear_left_wheel_link">
+        <inertial>
+            <mass value="3" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="0.7171" ixy="0" ixz="0" iyy="0.7171" iyz="0" izz="0.1361" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://scout_description/meshes/wheel.dae" />
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="rear_left_wheel" type="continuous">
+        <origin rpy="-1.57 0 0" xyz="-0.2319755 0.2082515 -0.100998" />
+        <parent link="base_link" />
+        <child link="rear_left_wheel_link" />
+        <axis xyz="0 0 1" rpy="0 0 0" />
+    </joint>
+
 
     <!-- Additional definitions -->
     <xacro:include filename="$(arg urdf_extras)" />
