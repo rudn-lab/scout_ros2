@@ -190,6 +190,20 @@
         <child link="camera_link" />
     </joint>
 
+    <link name="inertial_link">
+        <inertial>
+            <mass value="132.3898489950015" />
+            <origin xyz=" 0 0 0" />
+            <inertia ixx="0.185196122711036" ixy="4.30144213829512E-08" ixz="5.81037523686401E-08" iyy="0.364893736238929" iyz="-0.000386720198091934" izz="0.223868521722778" />
+        </inertial>
+    </link>
+
+    <joint name="inertial_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="inertial_link" />
+    </joint>
+
 <!-- 
     <link name="inertial_link">
         <inertial>
