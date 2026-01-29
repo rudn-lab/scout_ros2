@@ -27,33 +27,61 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="scout_wheel">
 
-    <xacro:macro name="scout_wheel_type2" params="wheel_prefix *joint_pose">
-        <link name="${wheel_prefix}_wheel_link">
+  <xacro:macro name="scout_mini_wheel" params="wheel_prefix wheel_diameter wheel_width axis *joint_pose">
+    <xacro:property name="wheel_radius" value="${wheel_diameter / 2}" />
+            <link name="${wheel_prefix}_wheel_link">
             <inertial>
                 <mass value="3" />
                 <origin xyz="0 0 0" />
-                <inertia ixx="0.7171" ixy="0" ixz="0" iyy="0.1361" iyz="0" izz="0.7171" />
-            </inertial>
+                <inertia 
+                    ixx="0.006564" ixy="0" ixz="0"
+                    iyy="0.006564" iyz="0" 
+                    izz="0.0096"/>
+              </inertial>                
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                    <mesh filename="package://scout_description/meshes/wheel_type1.dae" />
+                    <mesh filename="package://scout_description/meshes/wheel.dae" />
                 </geometry>
             </visual>
             <collision>
-                <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
-                <geometry>
-                    <cylinder length="${wheel_length}" radius="${wheel_radius}" />
-                </geometry>
+              <origin
+                xyz="0 0 0.03"
+                rpy="0 0 0" />
+              <geometry>
+                <!-- <mesh
+                  filename="package://scout_description/meshes/wheel.dae" /> -->
+                  <cylinder radius="0.08" length="0.084"/>
+
+              </geometry>
             </collision>
         </link>
 
         <joint name="${wheel_prefix}_wheel" type="continuous">
+            <!--<origin
+                  xyz="0.14547 0.20835 -0.07424"
+                  rpy="0 1.57 0" />-->
             <parent link="base_link"/>
             <child link="${wheel_prefix}_wheel_link"/>
             <xacro:insert_block name="joint_pose"/>
-            <axis xyz="0 -1 0" rpy="0 0 0" />
+            <axis xyz="0 0 ${axis}" rpy="0 0 0" />
+
+            <dynamics damping="0.0" friction="0.0"/>
+            <limit effort="1000" velocity="20"/>  <!-- High limits for fast turns -->
+
         </joint>
+
+<gazebo reference="rear_left_wheel">
+  <mu1>200.0</mu1>  <!-- High for no longitudinal slip (propulsion) -->
+  <mu2>200.0</mu2>  <!-- High for lateral grip during turns (prevents sliding) -->
+  <slip1>0.01</slip1>  <!-- Small torsional slip for realism/stability -->
+  <slip2>0.01</slip2>  <!-- Lateral slip; tune higher (0.1) if turns feel too sticky -->
+  <kp>1e7</kp>      <!-- Stiffness: prevents sinking -->
+  <kd>10.0</kd>     <!-- Damping: reduces bounce; increased from 1.0 -->
+  <fdir1>1 0 0</fdir1>
+  <minDepth>0.005</minDepth>  <!-- Deeper contacts for better force transmission -->
+  <maxContacts>10</maxContacts>
+</gazebo>
     </xacro:macro>
 
 </robot>
