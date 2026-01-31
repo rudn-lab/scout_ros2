@@ -3,6 +3,8 @@ controller_manager:
     update_rate: 100
     diff_drive_controller:
       type: diff_drive_controller/DiffDriveController
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
 
 diff_drive_controller:
   ros__parameters:
@@ -11,15 +13,31 @@ diff_drive_controller:
     wheel_separation: 0.58
     wheels_per_side: 2  # Enables skid-steer mode
     wheel_radius: 0.08
-    publish_rate: 50.0
-    odom_frame_id: odom
-    base_frame_id: base_link
-    enable_odom_tf: true
     linear:
       x:
         has_velocity_limits: true
-        max_velocity: 2.0
+        min_velocity: -10.0
+        max_velocity: 10.0
+        has_acceleration_limits: true
+        min_acceleration: -5.0
+        max_acceleration: 5.0
     angular:
       z:
         has_velocity_limits: true
-        max_velocity: 1.5
+        min_velocity: -20.0
+        max_velocity: 20.0
+        has_acceleration_limits: true
+        min_acceleration: -5.0  # Adjust if needed
+        max_acceleration: 5.0
+
+    publish_rate: 50.0  # Hz for /odom
+    odom_frame_id: odom
+    base_frame_id: base_link
+    enable_odom_tf: true
+
+    # Set non-zero diagonals (variance for X, Y, Z, roll, pitch, yaw)
+    # This is necessary, because an EKF down the line doesn't work properly with all 0
+    pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+
+    cmd_vel_timeout: 0.5
