@@ -32,6 +32,10 @@ class ScoutBaseRos : public rclcpp::Node {
   std::string base_frame_;
   std::string odom_topic_name_;
 
+  std::string status_topic_name_;
+  std::string motion_cmd_topic_name_;
+  std::string light_cmd_topic_name_;
+
   bool is_scout_mini_ = false;
   bool is_omni_wheel_ = false;
 

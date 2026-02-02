@@ -31,9 +31,18 @@ public:
   ScoutMessenger(std::shared_ptr<ScoutType> scout, rclcpp::Node *node)
       : scout_(scout), node_(node) {}
 
-  void SetOdometryFrame(std::string frame) { odom_frame_ = frame; }
-  void SetBaseFrame(std::string frame) { base_frame_ = frame; }
-  void SetOdometryTopicName(std::string name) { odom_topic_name_ = name; }
+  void SetFrames(std::string odomFrame, std::string baseFrame) {
+    odom_frame_ = odomFrame;
+    base_frame_ = baseFrame;
+  }
+  void SetDataTopicNames(std::string odomTopic, std::string statusTopic) {
+    odom_topic_name_ = odomTopic;
+    status_topic_name_ = statusTopic;
+  }
+  void SetCmdTopicNames(std::string motionCmdTopic, std::string lightCmdTopic) {
+    motion_cmd_topic_name_ = motionCmdTopic;
+    light_cmd_topic_name_ = lightCmdTopic;
+  }
 
   void SetSimulationMode(int loop_rate) {
     simulated_robot_ = true;
@@ -46,15 +55,15 @@ public:
     odom_pub_ =
         node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 50);
     status_pub_ = node_->create_publisher<scout_msgs::msg::ScoutStatus>(
-        "/scout_status", 10);
+        status_topic_name_, 10);
 
     // cmd subscriber
     motion_cmd_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>(
-        "/cmd_vel", 5,
+        motion_cmd_topic_name_, 5,
         std::bind(&ScoutMessenger::TwistCmdCallback, this,
                   std::placeholders::_1));
     light_cmd_sub_ = node_->create_subscription<scout_msgs::msg::ScoutLightCmd>(
-        "/light_control", 5,
+        light_cmd_topic_name_, 5,
         std::bind(&ScoutMessenger::LightCmdCallback, this,
                   std::placeholders::_1));
 
@@ -136,6 +145,9 @@ private:
   std::string odom_frame_;
   std::string base_frame_;
   std::string odom_topic_name_;
+  std::string status_topic_name_;
+  std::string motion_cmd_topic_name_;
+  std::string light_cmd_topic_name_;
 
   bool simulated_robot_ = false;
   int sim_control_rate_ = 50;
