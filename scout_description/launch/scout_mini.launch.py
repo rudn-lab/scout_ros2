@@ -20,7 +20,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "use_sim_time",
-            default_value=False,
+            default_value="False",
             description="Robot namespace (empty by default)",
         ),
     ]
