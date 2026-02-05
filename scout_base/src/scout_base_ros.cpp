@@ -23,7 +23,7 @@ ScoutBaseRos::ScoutBaseRos(std::string node_name)
   this->declare_parameter("base_frame", rclcpp::ParameterValue("base_link"));
   this->declare_parameter("odom_topic_name", rclcpp::ParameterValue("odom"));
 
-  this->declare_parameter("status_topic_name",    rclcpp::ParameterValue("/scout_status"));
+  this->declare_parameter("status_topic_name", rclcpp::ParameterValue("/scout_status"));
   this->declare_parameter("motion_cmd_topic_name", rclcpp::ParameterValue("/cmd_vel"));
   this->declare_parameter("light_cmd_topic_name", rclcpp::ParameterValue("/light_control"));
 
