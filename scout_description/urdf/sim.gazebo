@@ -13,12 +13,22 @@
     </plugin>
   </gazebo>
 
+  <xacro:property name="topic_prefix" value="/"/>
+  <xacro:if value="${'$(arg namespace)' != ''}">
+    <xacro:property name="topic_prefix" value="/$(arg namespace)/"/>
+  </xacro:if>
+
+  <xacro:property name="frame_prefix" value=""/>
+  <xacro:if value="${'$(arg namespace)' != ''}">
+    <xacro:property name="frame_prefix" value="$(arg namespace)/"/>
+  </xacro:if>
+
   <gazebo reference="laser_link">
     <sensor name="helios_lidar" type="gpu_lidar">
-      <gz_frame_id>laser_link</gz_frame_id>
+      <gz_frame_id>${frame_prefix}laser_link</gz_frame_id>
       <!-- Relative to lidar_link -->
       <pose>0 0 0.05 0 0 0</pose>
-      <topic>/lidar</topic>
+      <topic>${topic_prefix}lidar</topic>
       <update_rate>10</update_rate>
       <always_on>true</always_on>
       <visualize>true</visualize>
@@ -59,12 +69,12 @@
 
   <gazebo reference="camera_optical_link">
     <sensor name="realsense_d435" type="rgbd_camera">
-      <!-- Override prefixed frame_id -->
-      <gz_frame_id>camera_optical_link</gz_frame_id>
+      <!-- Override topic_prefixed frame_id -->
+      <gz_frame_id>${frame_prefix}camera_optical_link</gz_frame_id>
       <!-- Relative to camera_link -->
       <pose>0 0 0 0 0 0</pose>
       <!-- Base topic; subtopics: /image, /depth_image, /points, /camera_info -->
-      <topic>/camera</topic>
+      <topic>${topic_prefix}camera</topic>
       <update_rate>30</update_rate>
       <always_on>true</always_on>
       <visualize>true</visualize>

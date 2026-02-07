@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="scout_mini">
-  <xacro:arg name="namespace" default="/"/>
+  <xacro:arg name="namespace" default=""/>
   <xacro:include filename="$(find scout_description)/urdf/wheel.xacro"/>
 
   <!-- Variables -->

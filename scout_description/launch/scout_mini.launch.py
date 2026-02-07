@@ -21,7 +21,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "use_sim_time",
             default_value="False",
-            description="Robot namespace (empty by default)",
+            description="Whether to use Gazebo's clock",
         ),
     ]
 
@@ -48,6 +48,7 @@ def generate_launch_description():
             {
                 "use_sim_time": LaunchConfiguration("use_sim_time"),
                 "robot_description": robot_description,
+                "frame_prefix": [LaunchConfiguration("namespace"), "/"],
             }
         ],
     )
