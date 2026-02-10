@@ -19,6 +19,11 @@ def generate_launch_description():
             description="Robot namespace (empty by default)",
         ),
         DeclareLaunchArgument(
+            "sim_reduction",
+            default_value="2",
+            description="By how much to downsample the cameras' output in simulation",
+        ),
+        DeclareLaunchArgument(
             "use_sim_time",
             default_value="False",
             description="Whether to use Gazebo's clock",
@@ -35,6 +40,8 @@ def generate_launch_description():
             ),
             " namespace:=",
             LaunchConfiguration("namespace"),
+            " sim_reduction:=",
+            LaunchConfiguration("sim_reduction"),
         ]
     )
     robot_description = ParameterValue(robot_description_content, value_type=str)
