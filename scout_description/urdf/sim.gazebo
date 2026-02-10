@@ -4,6 +4,8 @@
     <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
+    <plugin filename="gz-sim-magnetometer-system" name="gz::sim::systems::Magnetometer"/>
     <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find scout_description)/config/diff_drive_controller.yaml</parameters>
       <robot_param>robot_description</robot_param>
@@ -111,6 +113,105 @@
           <p2>0.0</p2>
         </distortion>
       </camera>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="base_link">
+    <sensor name="imu" type="imu">
+      <gz_frame_id>${frame_prefix}base_link</gz_frame_id>
+      <pose>0 0 0 0 0 0</pose>
+      <topic>${topic_prefix}imu</topic>
+      <update_rate>100</update_rate>
+      <always_on>true</always_on>
+      <imu>
+        <angular_velocity>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <!-- 0.08 °/s/√Hz * √100 = 0.8 °/s → rad/s -->
+              <stddev>0.01396</stddev>
+              <bias_mean>0.0</bias_mean>
+              <!-- 10 °/h bias stability → rad/s -->
+              <bias_stddev>0.00004848</bias_stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.01396</stddev>
+              <bias_mean>0.0</bias_mean>
+              <bias_stddev>0.00004848</bias_stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.01396</stddev>
+              <bias_mean>0.0</bias_mean>
+              <bias_stddev>0.00004848</bias_stddev>
+            </noise>
+          </z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <!-- 120 μg/√Hz * √100 = 0.0012 g → m/s² (g=9.81) -->
+              <stddev>0.01177</stddev>
+              <bias_mean>0.0</bias_mean>
+              <!-- 30 mG bias stability = 0.03 g → m/s² -->
+              <bias_stddev>0.2943</bias_stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.01177</stddev>
+              <bias_mean>0.0</bias_mean>
+              <bias_stddev>0.2943</bias_stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.01177</stddev>
+              <bias_mean>0.0</bias_mean>
+              <bias_stddev>0.2943</bias_stddev>
+            </noise>
+          </z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="base_link">
+    <sensor name="magnetometer" type="magnetometer">
+      <gz_frame_id>${frame_prefix}base_link</gz_frame_id>
+      <pose>0 0 0 0 0 0</pose>
+      <topic>${topic_prefix}magnetic_field</topic>
+      <update_rate>100</update_rate>
+      <always_on>true</always_on>
+      <magnetometer>
+        <x>
+          <noise type="gaussian">
+            <mean>0.0</mean>
+            <!-- Approx. based on 0.25 mG resolution / 2 → T (1 G = 10^{-4} T) -->
+            <stddev>0.0000000125</stddev>
+          </noise>
+        </x>
+        <y>
+          <noise type="gaussian">
+            <mean>0.0</mean>
+            <stddev>0.0000000125</stddev>
+          </noise>
+        </y>
+        <z>
+          <noise type="gaussian">
+            <mean>0.0</mean>
+            <stddev>0.0000000125</stddev>
+          </noise>
+        </z>
+      </magnetometer>
     </sensor>
   </gazebo>
 
