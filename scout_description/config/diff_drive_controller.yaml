@@ -36,7 +36,7 @@ diff_drive_controller:
     tf_frame_prefix: ""
     odom_frame_id: odom
     base_frame_id: base_link
-    enable_odom_tf: true
+    enable_odom_tf: false
 
     # Set non-zero diagonals (variance for X, Y, Z, roll, pitch, yaw)
     # This is necessary, because an EKF down the line doesn't work properly with all 0
