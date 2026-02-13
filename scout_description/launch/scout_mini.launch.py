@@ -24,9 +24,9 @@ def generate_launch_description():
             description="By how much to downsample the cameras' output in simulation",
         ),
         DeclareLaunchArgument(
-            "use_sim_time",
+            "sim",
             default_value="False",
-            description="Whether to use Gazebo's clock",
+            description="Run in Gazebo sim (enables sensors and uses sim time).",
         ),
     ]
 
@@ -42,6 +42,8 @@ def generate_launch_description():
             LaunchConfiguration("namespace"),
             " sim_reduction:=",
             LaunchConfiguration("sim_reduction"),
+            " sim:=",
+            LaunchConfiguration("sim"),
         ]
     )
     robot_description = ParameterValue(robot_description_content, value_type=str)
@@ -53,7 +55,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
-                "use_sim_time": LaunchConfiguration("use_sim_time"),
+                "use_sim_time": LaunchConfiguration("sim"),
                 "robot_description": robot_description,
                 "frame_prefix": [LaunchConfiguration("namespace"), "/"],
             }

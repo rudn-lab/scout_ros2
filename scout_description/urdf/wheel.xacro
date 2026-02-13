@@ -47,33 +47,43 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         </geometry>
       </collision>
     </link>
-    <joint name="${wheel_prefix}_wheel" type="continuous">
-      <parent link="base_link"/>
-      <child link="${wheel_prefix}_wheel_link"/>
-      <xacro:insert_block name="joint_pose"/>
-      <axis xyz="0 0 ${axis}" rpy="0 0 0"/>
-      <dynamics damping="0.0" friction="0.0"/>
-      <limit effort="1000" velocity="20"/>
-      <!-- High limits for fast turns -->
-    </joint>
+    <xacro:if value="${'$(arg sim)'}">
+      <joint name="${wheel_prefix}_wheel" type="continuous">
+        <parent link="base_link"/>
+        <child link="${wheel_prefix}_wheel_link"/>
+        <xacro:insert_block name="joint_pose"/>
+        <axis xyz="0 0 ${axis}" rpy="0 0 0"/>
+        <dynamics damping="0.0" friction="0.0"/>
+        <limit effort="1000" velocity="20"/>
+        <!-- High limits for fast turns -->
+      </joint>
 
-    <gazebo reference="${wheel_prefix}_wheel_link">
-      <!-- High for no longitudinal slip (propulsion) -->
-      <mu1>200.0</mu1>
-      <!-- High for lateral grip during turns (prevents sliding) -->
-      <mu2>0.7</mu2>
-      <!-- Small torsional slip for realism/stability -->
-      <slip1>0.01</slip1>
-      <!-- Lateral slip; tune higher (0.1) if turns feel too sticky -->
-      <slip2>0.01</slip2>
-      <!-- Stiffness: prevents sinking -->
-      <kp>1e7</kp>
-      <!-- Damping: reduces bounce; increased from 1.0 -->
-      <kd>10.0</kd>
-      <fdir1>1 0 0</fdir1>
-      <!-- Deeper contacts for better force transmission -->
-      <minDepth>0.005</minDepth>
-      <maxContacts>10</maxContacts>
-    </gazebo>
+      <gazebo reference="${wheel_prefix}_wheel_link">
+        <!-- High for no longitudinal slip (propulsion) -->
+        <mu1>200.0</mu1>
+        <!-- High for lateral grip during turns (prevents sliding) -->
+        <mu2>0.7</mu2>
+        <!-- Small torsional slip for realism/stability -->
+        <slip1>0.01</slip1>
+        <!-- Lateral slip; tune higher (0.1) if turns feel too sticky -->
+        <slip2>0.01</slip2>
+        <!-- Stiffness: prevents sinking -->
+        <kp>1e7</kp>
+        <!-- Damping: reduces bounce; increased from 1.0 -->
+        <kd>10.0</kd>
+        <fdir1>1 0 0</fdir1>
+        <!-- Deeper contacts for better force transmission -->
+        <minDepth>0.005</minDepth>
+        <maxContacts>10</maxContacts>
+      </gazebo>
+    </xacro:if>
+
+    <xacro:unless value="${'$(arg sim)'}">
+      <joint name="${wheel_prefix}_wheel" type="fixed">
+        <parent link="base_link"/>
+        <child link="${wheel_prefix}_wheel_link"/>
+        <xacro:insert_block name="joint_pose"/>
+      </joint>
+    </xacro:unless>
   </xacro:macro>
 </robot>
