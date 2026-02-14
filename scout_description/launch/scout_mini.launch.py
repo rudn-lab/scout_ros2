@@ -6,6 +6,7 @@ from launch.substitutions import (
     PathJoinSubstitution,
     FindExecutable,
 )
+from launch.conditions import IfCondition
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
@@ -62,9 +63,31 @@ def generate_launch_description():
         ],
     )
 
+    camera_depth_pointcloud_transform = Node(
+        package="topic_tools",
+        executable="transform",
+        name="frame_id_transformer",
+        arguments=[
+            "/camera/depth/image_raw/points",
+            "/camera/depth/image_raw/points/transformed",
+            "sensor_msgs/msg/PointCloud2",
+            "(d:=copy.deepcopy(m), "
+            'setattr(d.header, "frame_id", "d435_camera_depth_frame"), '
+            "d)[2]",
+            "--import",
+            "sensor_msgs",
+            "copy",
+            "--wait-for-start",
+        ],
+        parameters=[{"use_sim_time": LaunchConfiguration("sim")}],
+        output="screen",
+        condition=IfCondition(LaunchConfiguration("sim")),
+    )
+
     return LaunchDescription(
         declared_args
         + [
             robot_state_publisher,
+            camera_depth_pointcloud_transform,
         ]
     )
