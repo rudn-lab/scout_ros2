@@ -26,7 +26,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "sim",
-            default_value="False",
+            default_value="false",
             description="Run in Gazebo sim (enables sensors and uses sim time).",
         ),
         DeclareLaunchArgument(
