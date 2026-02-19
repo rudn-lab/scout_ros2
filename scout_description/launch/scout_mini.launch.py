@@ -30,7 +30,7 @@ def generate_launch_description():
             description="Run in Gazebo sim (enables sensors and uses sim time).",
         ),
         DeclareLaunchArgument(
-            "depth_camera_points_topic_name",
+            "camera_depth_points_topic",
             default_value="/camera/depth/points",
             description="Unified topic name for points received from the depth camera.",
         ),
@@ -74,7 +74,7 @@ def generate_launch_description():
         name="frame_id_transformer",
         arguments=[
             "/camera/depth/image_raw/points",
-            LaunchConfiguration("depth_camera_points_topic_name"),
+            LaunchConfiguration("camera_depth_points_topic"),
             "sensor_msgs/msg/PointCloud2",
             "(d:=copy.deepcopy(m), "
             'setattr(d.header, "frame_id", "d435_camera_depth_frame"), '
