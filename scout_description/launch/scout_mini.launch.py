@@ -73,7 +73,7 @@ def generate_launch_description():
         executable="transform",
         name="frame_id_transformer",
         arguments=[
-            "/camera/depth/image_raw/points",
+            "/d435_camera/depth/image_raw/points",
             LaunchConfiguration("camera_depth_points_topic"),
             "sensor_msgs/msg/PointCloud2",
             "(d:=copy.deepcopy(m), "
