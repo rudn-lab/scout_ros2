@@ -29,11 +29,16 @@ def generate_launch_description():
             description="Run in Gazebo sim (enables sensors and uses sim time).",
         ),
         DeclareLaunchArgument(
-            "camera_depth_points_topic",
-            default_value="/camera/depth/points",
-            description="Unified topic name for points received from the depth camera.",
+            "publish_tf",
+            default_value="true",
+            description="Whether to publish odom transform from the chassis",
         ),
     ]
+
+    namespace = LaunchConfiguration("namespace")
+    sim_reduction = LaunchConfiguration("sim_reduction")
+    sim = LaunchConfiguration("sim")
+    publish_tf = LaunchConfiguration("publish_tf")
 
     model_name = "scout_mini.xacro"
     robot_description_content = Command(
@@ -44,11 +49,11 @@ def generate_launch_description():
                 [FindPackageShare("scout_description"), "urdf", model_name]
             ),
             " namespace:=",
-            LaunchConfiguration("namespace"),
+            namespace,
             " sim_reduction:=",
-            LaunchConfiguration("sim_reduction"),
+            sim_reduction,
             " sim:=",
-            LaunchConfiguration("sim"),
+            sim,
         ]
     )
     robot_description = ParameterValue(robot_description_content, value_type=str)
@@ -60,9 +65,10 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {
-                "use_sim_time": LaunchConfiguration("sim"),
+                "use_sim_time": sim,
                 "robot_description": robot_description,
-                "frame_prefix": [LaunchConfiguration("namespace"), "/"],
+                "frame_prefix": [namespace, "/"],
+                "publish_tf": publish_tf,
             }
         ],
     )
