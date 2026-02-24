@@ -133,11 +133,11 @@
     </sensor>
   </gazebo>
 
-  <gazebo reference="base_link">
+  <gazebo reference="imu_link">
     <sensor name="imu" type="imu">
-      <gz_frame_id>${frame_prefix}base_link</gz_frame_id>
+      <gz_frame_id>${frame_prefix}imu_link</gz_frame_id>
       <pose>0 0 0 0 0 0</pose>
-      <topic>${topic_prefix}imu</topic>
+      <topic>${topic_prefix}imu/data</topic>
       <update_rate>100</update_rate>
       <always_on>true</always_on>
       <imu>
@@ -201,11 +201,11 @@
     </sensor>
   </gazebo>
 
-  <gazebo reference="base_link">
+  <gazebo reference="imu_link">
     <sensor name="magnetometer" type="magnetometer">
-      <gz_frame_id>${frame_prefix}base_link</gz_frame_id>
+      <gz_frame_id>${frame_prefix}imu_link</gz_frame_id>
       <pose>0 0 0 0 0 0</pose>
-      <topic>${topic_prefix}magnetic_field</topic>
+      <topic>${topic_prefix}imu/mag</topic>
       <update_rate>100</update_rate>
       <always_on>true</always_on>
       <magnetometer>
