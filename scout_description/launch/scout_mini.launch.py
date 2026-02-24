@@ -26,12 +26,17 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "sim",
             default_value="false",
-            description="Run in Gazebo sim (enables sensors and uses sim time).",
+            description="Run in Gazebo sim (enables sensors and uses sim time)",
         ),
         DeclareLaunchArgument(
             "publish_tf",
             default_value="true",
             description="Whether to publish odom transform from the chassis",
+        ),
+        DeclareLaunchArgument(
+            "use_stamped_cmd_vel",
+            default_value="false",
+            description="Whether to use TwistStamped instead of Twist for movement control",
         ),
     ]
 

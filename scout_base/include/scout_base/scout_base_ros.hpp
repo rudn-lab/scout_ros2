@@ -37,6 +37,7 @@ private:
   std::string light_cmd_topic_name_;
 
   bool publish_tf_ = true;
+  bool use_stamped_cmd_vel_ = false;
 
   bool is_scout_mini_ = false;
   bool is_omni_wheel_ = false;

@@ -15,6 +15,7 @@
 #include <string>
 
 #include <geometry_msgs/msg/twist.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -25,8 +26,21 @@
 
 #include "ugv_sdk/mobile_robot/scout_robot.hpp"
 
+// Extracts a plain Twist from either Twist or TwistStamped.
+template <typename T>
+const geometry_msgs::msg::Twist &ExtractTwist(const T &msg) {
+  return msg; // base case: message is already a Twist
+}
+
+template <>
+const geometry_msgs::msg::Twist &
+ExtractTwist(const geometry_msgs::msg::TwistStamped &msg) {
+  return msg.twist;
+}
+
 namespace westonrobot {
-template <typename ScoutType> class ScoutMessenger {
+template <typename ScoutType, typename TwistMsgType = geometry_msgs::msg::Twist>
+class ScoutMessenger {
 public:
   ScoutMessenger(std::shared_ptr<ScoutType> scout, rclcpp::Node *node)
       : scout_(scout), node_(node) {}
@@ -60,7 +74,7 @@ public:
         status_topic_name_, 10);
 
     // cmd subscriber
-    motion_cmd_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>(
+    motion_cmd_sub_ = node_->create_subscription<TwistMsgType>(
         motion_cmd_topic_name_, 5,
         std::bind(&ScoutMessenger::TwistCmdCallback, this,
                   std::placeholders::_1));
@@ -161,7 +175,7 @@ private:
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<scout_msgs::msg::ScoutStatus>::SharedPtr status_pub_;
 
-  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr motion_cmd_sub_;
+  typename rclcpp::Subscription<TwistMsgType>::SharedPtr motion_cmd_sub_;
   rclcpp::Subscription<scout_msgs::msg::ScoutLightCmd>::SharedPtr
       light_cmd_sub_;
 
@@ -175,31 +189,32 @@ private:
   rclcpp::Time last_time_;
   rclcpp::Time current_time_;
 
-  void TwistCmdCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
+  void TwistCmdCallback(const typename TwistMsgType::SharedPtr msg) {
+    const geometry_msgs::msg::Twist &twist = ExtractTwist(*msg);
     if (!simulated_robot_) {
-      SetScoutMotionCommand(scout_, msg);
+      SetScoutMotionCommand(scout_, twist);
     } else {
       std::lock_guard<std::mutex> guard(twist_mutex_);
-      current_twist_ = *msg.get();
+      current_twist_ = twist;
     }
-    RCLCPP_INFO(node_->get_logger(), "Cmd received:%f, %f", msg->linear.x,
-                msg->angular.z);
+    RCLCPP_INFO(node_->get_logger(), "Cmd received:%f, %f", twist.linear.x,
+                twist.angular.z);
   }
 
   template <typename T,
             std::enable_if_t<!std::is_base_of<ScoutMiniOmniRobot, T>::value,
                              bool> = true>
   void SetScoutMotionCommand(std::shared_ptr<T> base,
-                             const geometry_msgs::msg::Twist::SharedPtr &msg) {
-    base->SetMotionCommand(msg->linear.x, msg->angular.z);
+                             const geometry_msgs::msg::Twist &twist) {
+    base->SetMotionCommand(twist.linear.x, twist.angular.z);
   }
 
   template <typename T,
             std::enable_if_t<std::is_base_of<ScoutMiniOmniRobot, T>::value,
                              bool> = true>
   void SetScoutMotionCommand(std::shared_ptr<T> base,
-                             const geometry_msgs::msg::Twist::SharedPtr &msg) {
-    base->SetMotionCommand(msg->linear.x, msg->angular.z, msg->linear.y);
+                             const geometry_msgs::msg::Twist &twist) {
+    base->SetMotionCommand(twist.linear.x, twist.angular.z, twist.linear.y);
   }
 
   void LightCmdCallback(const scout_msgs::msg::ScoutLightCmd::SharedPtr msg) {

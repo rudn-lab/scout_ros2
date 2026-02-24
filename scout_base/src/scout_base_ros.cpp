@@ -30,6 +30,7 @@ ScoutBaseRos::ScoutBaseRos(std::string node_name)
                           rclcpp::ParameterValue("/light_control"));
 
   this->declare_parameter("publish_tf", rclcpp::ParameterValue(true));
+  this->declare_parameter("use_stamped_cmd_vel", rclcpp::ParameterValue(false));
 
   this->declare_parameter("is_scout_mini", rclcpp::ParameterValue(false));
   this->declare_parameter("is_omni_wheel", rclcpp::ParameterValue(false));
@@ -56,6 +57,8 @@ void ScoutBaseRos::LoadParameters() {
                                       light_cmd_topic_name_, "/light_control");
 
   this->get_parameter_or<bool>("publish_tf", publish_tf_, true);
+  this->get_parameter_or<bool>("use_stamped_cmd_vel", use_stamped_cmd_vel_,
+                               false);
 
   this->get_parameter_or<bool>("is_scout_mini", is_scout_mini_, false);
   this->get_parameter_or<bool>("is_omni_wheel", is_omni_wheel_, false);
@@ -148,80 +151,67 @@ bool ScoutBaseRos::Initialize() {
 void ScoutBaseRos::Stop() { keep_running_ = false; }
 
 void ScoutBaseRos::Run() {
+
+  auto run_messenger = [&](auto robot, auto connect_fn) {
+    using RobotType = typename decltype(robot)::element_type;
+
+    auto make_and_run = [&](auto messenger) {
+      messenger->SetFrames(odom_frame_, base_frame_);
+      messenger->SetDataTopicNames(odom_topic_name_, status_topic_name_);
+      messenger->SetCmdTopicNames(motion_cmd_topic_name_,
+                                  light_cmd_topic_name_);
+      if (simulated_robot_)
+        messenger->SetSimulationMode(sim_control_rate_);
+      messenger->SetPublishTf(publish_tf_);
+
+      if (!connect_fn())
+        return;
+
+      // publish robot state at 50Hz while listening to twist commands
+      messenger->SetupSubscription();
+      keep_running_ = true;
+      rclcpp::Rate rate(50, this->get_clock());
+      while (keep_running_) {
+        messenger->PublishStateToROS();
+        rclcpp::spin_some(shared_from_this());
+        // rate.sleep();
+        this->get_clock()->sleep_for(rclcpp::Duration(0, 20000000));
+      }
+    };
+
+    if (use_stamped_cmd_vel_) {
+      make_and_run(std::make_unique<
+                   ScoutMessenger<RobotType, geometry_msgs::msg::TwistStamped>>(
+          robot, this));
+    } else {
+      make_and_run(std::make_unique<
+                   ScoutMessenger<RobotType, geometry_msgs::msg::Twist>>(robot,
+                                                                         this));
+    }
+  };
+
+  auto make_connect_fn = [&](auto robot) {
+    return [&, robot]() -> bool {
+      if (port_name_.find("can") == std::string::npos) {
+        std::cout << "Please check the specified port name is a CAN port"
+                  << std::endl;
+        return false;
+      }
+      if (robot->Connect(port_name_)) {
+        robot->EnableCommandedMode();
+        std::cout << "Using CAN bus to talk with the robot" << std::endl;
+        return true;
+      }
+      std::cout << "Failed to connect to the robot CAN bus" << std::endl;
+      return false;
+    };
+  };
+
   // instantiate a ROS messenger
   if (!is_omni_) {
-    std::unique_ptr<ScoutMessenger<ScoutRobot>> messenger =
-        std::unique_ptr<ScoutMessenger<ScoutRobot>>(
-            new ScoutMessenger<ScoutRobot>(robot_, this));
-
-    messenger->SetFrames(odom_frame_, base_frame_);
-    messenger->SetDataTopicNames(odom_topic_name_, status_topic_name_);
-    messenger->SetCmdTopicNames(motion_cmd_topic_name_, light_cmd_topic_name_);
-    if (simulated_robot_)
-      messenger->SetSimulationMode(sim_control_rate_);
-    messenger->SetPublishTf(publish_tf_);
-
-    // connect to robot and setup ROS subscription
-    if (port_name_.find("can") != std::string::npos) {
-      if (robot_->Connect(port_name_)) {
-        robot_->EnableCommandedMode();
-        std::cout << "Using CAN bus to talk with the robot" << std::endl;
-      } else {
-        std::cout << "Failed to connect to the robot CAN bus" << std::endl;
-        return;
-      }
-    } else {
-      std::cout << "Please check the specified port name is a CAN port"
-                << std::endl;
-      return;
-    }
-
-    // publish robot state at 50Hz while listening to twist commands
-    messenger->SetupSubscription();
-    keep_running_ = true;
-    rclcpp::Rate rate(50, this->get_clock());
-    while (keep_running_) {
-      messenger->PublishStateToROS();
-      rclcpp::spin_some(shared_from_this());
-      // rate.sleep();
-      this->get_clock()->sleep_for(rclcpp::Duration(0, 20000000));
-    }
+    run_messenger(robot_, make_connect_fn(robot_));
   } else {
-    std::unique_ptr<ScoutMessenger<ScoutMiniOmniRobot>> messenger =
-        std::unique_ptr<ScoutMessenger<ScoutMiniOmniRobot>>(
-            new ScoutMessenger<ScoutMiniOmniRobot>(omni_robot_, this));
-
-    messenger->SetFrames(odom_frame_, base_frame_);
-    messenger->SetDataTopicNames(odom_topic_name_, status_topic_name_);
-    messenger->SetCmdTopicNames(motion_cmd_topic_name_, light_cmd_topic_name_);
-    if (simulated_robot_)
-      messenger->SetSimulationMode(sim_control_rate_);
-    messenger->SetPublishTf(publish_tf_);
-
-    // connect to robot and setup ROS subscription
-    if (port_name_.find("can") != std::string::npos) {
-      if (omni_robot_->Connect(port_name_)) {
-        omni_robot_->EnableCommandedMode();
-        std::cout << "Using CAN bus to talk with the robot" << std::endl;
-      } else {
-        std::cout << "Failed to connect to the robot CAN bus" << std::endl;
-        return;
-      }
-    } else {
-      std::cout << "Please check the specified port name is a CAN port"
-                << std::endl;
-      return;
-    }
-
-    // publish robot state at 50Hz while listening to twist commands
-    messenger->SetupSubscription();
-    rclcpp::Rate rate(50);
-    keep_running_ = true;
-    while (keep_running_) {
-      messenger->PublishStateToROS();
-      rclcpp::spin_some(shared_from_this());
-      rate.sleep();
-    }
+    run_messenger(omni_robot_, make_connect_fn(omni_robot_));
   }
 }
 } // namespace westonrobot
