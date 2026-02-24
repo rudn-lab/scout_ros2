@@ -14,7 +14,6 @@
 
 namespace westonrobot {
 
-
 ScoutBaseRos::ScoutBaseRos(std::string node_name)
     : rclcpp::Node(node_name), keep_running_(false) {
   this->declare_parameter("port_name", rclcpp::ParameterValue("can0"));
@@ -23,9 +22,14 @@ ScoutBaseRos::ScoutBaseRos(std::string node_name)
   this->declare_parameter("base_frame", rclcpp::ParameterValue("base_link"));
   this->declare_parameter("odom_topic_name", rclcpp::ParameterValue("odom"));
 
-  this->declare_parameter("status_topic_name", rclcpp::ParameterValue("/scout_status"));
-  this->declare_parameter("motion_cmd_topic_name", rclcpp::ParameterValue("/cmd_vel"));
-  this->declare_parameter("light_cmd_topic_name", rclcpp::ParameterValue("/light_control"));
+  this->declare_parameter("status_topic_name",
+                          rclcpp::ParameterValue("/scout_status"));
+  this->declare_parameter("motion_cmd_topic_name",
+                          rclcpp::ParameterValue("/cmd_vel"));
+  this->declare_parameter("light_cmd_topic_name",
+                          rclcpp::ParameterValue("/light_control"));
+
+  this->declare_parameter("publish_tf", rclcpp::ParameterValue(true));
 
   this->declare_parameter("is_scout_mini", rclcpp::ParameterValue(false));
   this->declare_parameter("is_omni_wheel", rclcpp::ParameterValue(false));
@@ -41,11 +45,17 @@ void ScoutBaseRos::LoadParameters() {
 
   this->get_parameter_or<std::string>("odom_frame", odom_frame_, "odom");
   this->get_parameter_or<std::string>("base_frame", base_frame_, "base_link");
-  this->get_parameter_or<std::string>("odom_topic_name", odom_topic_name_, "odom");
+  this->get_parameter_or<std::string>("odom_topic_name", odom_topic_name_,
+                                      "odom");
 
-  this->get_parameter_or<std::string>("status_topic_name", status_topic_name_, "/scout_status");
-  this->get_parameter_or<std::string>("motion_cmd_topic_name", motion_cmd_topic_name_, "/cmd_vel");
-  this->get_parameter_or<std::string>("light_cmd_topic_name", light_cmd_topic_name_, "/light_control");
+  this->get_parameter_or<std::string>("status_topic_name", status_topic_name_,
+                                      "/scout_status");
+  this->get_parameter_or<std::string>("motion_cmd_topic_name",
+                                      motion_cmd_topic_name_, "/cmd_vel");
+  this->get_parameter_or<std::string>("light_cmd_topic_name",
+                                      light_cmd_topic_name_, "/light_control");
+
+  this->get_parameter_or<bool>("publish_tf", publish_tf_, true);
 
   this->get_parameter_or<bool>("is_scout_mini", is_scout_mini_, false);
   this->get_parameter_or<bool>("is_omni_wheel", is_omni_wheel_, false);
@@ -60,8 +70,11 @@ void ScoutBaseRos::LoadParameters() {
   std::cout << "- odom topic name: " << odom_topic_name_ << std::endl;
 
   std::cout << "- status topic name: " << status_topic_name_ << std::endl;
-  std::cout << "- motion_cmd topic name: " << motion_cmd_topic_name_ << std::endl;
+  std::cout << "- motion_cmd topic name: " << motion_cmd_topic_name_
+            << std::endl;
   std::cout << "- light_cmd topic name: " << light_cmd_topic_name_ << std::endl;
+
+  std::cout << "- publish_tf: " << std::boolalpha << publish_tf_ << std::endl;
 
   std::cout << "- is scout mini: " << std::boolalpha << is_scout_mini_
             << std::endl;
@@ -146,6 +159,7 @@ void ScoutBaseRos::Run() {
     messenger->SetCmdTopicNames(motion_cmd_topic_name_, light_cmd_topic_name_);
     if (simulated_robot_)
       messenger->SetSimulationMode(sim_control_rate_);
+    messenger->SetPublishTf(publish_tf_);
 
     // connect to robot and setup ROS subscription
     if (port_name_.find("can") != std::string::npos) {
@@ -182,6 +196,7 @@ void ScoutBaseRos::Run() {
     messenger->SetCmdTopicNames(motion_cmd_topic_name_, light_cmd_topic_name_);
     if (simulated_robot_)
       messenger->SetSimulationMode(sim_control_rate_);
+    messenger->SetPublishTf(publish_tf_);
 
     // connect to robot and setup ROS subscription
     if (port_name_.find("can") != std::string::npos) {

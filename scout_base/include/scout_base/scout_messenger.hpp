@@ -44,6 +44,8 @@ public:
     light_cmd_topic_name_ = lightCmdTopic;
   }
 
+  void SetPublishTf(bool publish_tf) { publish_tf_ = publish_tf; }
+
   void SetSimulationMode(int loop_rate) {
     simulated_robot_ = true;
     sim_control_rate_ = loop_rate;
@@ -151,6 +153,7 @@ private:
 
   bool simulated_robot_ = false;
   int sim_control_rate_ = 50;
+  bool publish_tf_ = true;
 
   std::mutex twist_mutex_;
   geometry_msgs::msg::Twist current_twist_;
@@ -179,7 +182,8 @@ private:
       std::lock_guard<std::mutex> guard(twist_mutex_);
       current_twist_ = *msg.get();
     }
-    RCLCPP_INFO(node_->get_logger(), "Cmd received:%f, %f", msg->linear.x, msg->angular.z);
+    RCLCPP_INFO(node_->get_logger(), "Cmd received:%f, %f", msg->linear.x,
+                msg->angular.z);
   }
 
   template <typename T,
@@ -272,7 +276,9 @@ private:
     tf_msg.transform.translation.z = 0.0;
     tf_msg.transform.rotation = odom_quat;
 
-    tf_broadcaster_->sendTransform(tf_msg);
+    if (publish_tf_) {
+      tf_broadcaster_->sendTransform(tf_msg);
+    }
 
     // publish odometry and tf messages
     nav_msgs::msg::Odometry odom_msg;

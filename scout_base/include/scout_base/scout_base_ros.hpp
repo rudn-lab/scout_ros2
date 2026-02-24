@@ -19,14 +19,14 @@
 
 namespace westonrobot {
 class ScoutBaseRos : public rclcpp::Node {
- public:
+public:
   ScoutBaseRos(std::string node_name);
 
   bool Initialize();
   void Run();
   void Stop();
 
- private:
+private:
   std::string port_name_;
   std::string odom_frame_;
   std::string base_frame_;
@@ -35,6 +35,8 @@ class ScoutBaseRos : public rclcpp::Node {
   std::string status_topic_name_;
   std::string motion_cmd_topic_name_;
   std::string light_cmd_topic_name_;
+
+  bool publish_tf_ = true;
 
   bool is_scout_mini_ = false;
   bool is_omni_wheel_ = false;
@@ -50,6 +52,6 @@ class ScoutBaseRos : public rclcpp::Node {
 
   void LoadParameters();
 };
-}  // namespace westonrobot
+} // namespace westonrobot
 
 #endif /* SCOUT_BASE_ROS_HPP */
