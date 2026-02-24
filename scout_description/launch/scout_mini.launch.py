@@ -28,22 +28,11 @@ def generate_launch_description():
             default_value="false",
             description="Run in Gazebo sim (enables sensors and uses sim time)",
         ),
-        DeclareLaunchArgument(
-            "publish_tf",
-            default_value="true",
-            description="Whether to publish odom transform from the chassis",
-        ),
-        DeclareLaunchArgument(
-            "use_stamped_cmd_vel",
-            default_value="false",
-            description="Whether to use TwistStamped instead of Twist for movement control",
-        ),
     ]
 
     namespace = LaunchConfiguration("namespace")
     sim_reduction = LaunchConfiguration("sim_reduction")
     sim = LaunchConfiguration("sim")
-    publish_tf = LaunchConfiguration("publish_tf")
 
     model_name = "scout_mini.xacro"
     robot_description_content = Command(
@@ -73,7 +62,6 @@ def generate_launch_description():
                 "use_sim_time": sim,
                 "robot_description": robot_description,
                 "frame_prefix": [namespace, "/"],
-                "publish_tf": publish_tf,
             }
         ],
     )
