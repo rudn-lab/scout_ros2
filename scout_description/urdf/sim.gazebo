@@ -37,7 +37,7 @@
         <scan>
           <horizontal>
             <!-- ~0.2° resolution -->
-            <samples>${360/0.02}</samples>
+            <samples>${360/0.2}</samples>
             <resolution>1</resolution>
             <min_angle>${-M_PI}</min_angle>
             <max_angle>${M_PI}</max_angle>
