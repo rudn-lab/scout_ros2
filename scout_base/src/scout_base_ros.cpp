@@ -174,8 +174,8 @@ void ScoutBaseRos::Run() {
       while (keep_running_) {
         messenger->PublishStateToROS();
         rclcpp::spin_some(shared_from_this());
-        // rate.sleep();
-        this->get_clock()->sleep_for(rclcpp::Duration(0, 20000000));
+        rate.sleep();
+        //this->get_clock()->sleep_for(rclcpp::Duration(0, 20000000));
       }
     };
 
