@@ -19,7 +19,6 @@
   <xacro:property name="wheel_diameter" value="0.16"/>
   <xacro:property name="wheel_width" value="0.084"/>
   <xacro:property name="wheel_length" value="0.8e-01"/>
-  <xacro:property name="wheel_radius" value="1.600e-01"/>
 
   <link name="base_link">
     <inertial>
