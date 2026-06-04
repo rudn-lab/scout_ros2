@@ -7,7 +7,7 @@
     <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
     <plugin filename="gz-sim-magnetometer-system" name="gz::sim::systems::Magnetometer"/>
     <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-      <parameters>$(find scout_description)/config/diff_drive_controller.yaml</parameters>
+      <parameters>$(find scout_description)/config/$(arg controller_file)</parameters>
       <robot_param>robot_description</robot_param>
       <ros>
         <namespace>$(arg namespace)</namespace>

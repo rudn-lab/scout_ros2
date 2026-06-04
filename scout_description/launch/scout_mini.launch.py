@@ -24,6 +24,11 @@ def generate_launch_description():
             description="By how much to downsample the cameras' output in simulation",
         ),
         DeclareLaunchArgument(
+            "controller_file",
+            default_value="diff_drive_controller.yaml",
+            description="Controller configuration file. Path in scout_description/config",
+        ),
+        DeclareLaunchArgument(
             "sim",
             default_value="false",
             description="Run in Gazebo sim (enables sensors and uses sim time)",
@@ -32,6 +37,7 @@ def generate_launch_description():
 
     namespace = LaunchConfiguration("namespace")
     sim_reduction = LaunchConfiguration("sim_reduction")
+    controller_file = LaunchConfiguration("controller_file")
     sim = LaunchConfiguration("sim")
 
     model_name = "scout_mini.xacro"
@@ -46,6 +52,8 @@ def generate_launch_description():
             namespace,
             " sim_reduction:=",
             sim_reduction,
+            " controller_file:=",
+            controller_file,
             " sim:=",
             sim,
         ]
