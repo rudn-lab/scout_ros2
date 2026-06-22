@@ -1,9 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <gazebo>
-    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
-      <render_engine>ogre2</render_engine>
-    </plugin>
+    <!-- The Sensors system renders the GPU lidar + RGB/depth cameras every tick.
+         Nothing in RL-corrector training consumes them, and the rendering is the
+         dominant per-step cost, so sim_sensors:=false drops it for training. The
+         IMU/magnetometer systems below are cheap (no rendering) and the IMU is a
+         slip-observing signal the policy may use, so they stay always-on. -->
+    <xacro:if value="${'$(arg sim_sensors)'}">
+      <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+        <render_engine>ogre2</render_engine>
+      </plugin>
+    </xacro:if>
     <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
     <plugin filename="gz-sim-magnetometer-system" name="gz::sim::systems::Magnetometer"/>
     <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
@@ -25,6 +32,7 @@
     <xacro:property name="frame_prefix" value="$(arg namespace)/"/>
   </xacro:if>
 
+  <xacro:if value="${'$(arg sim_sensors)'}">
   <gazebo reference="laser_link">
     <sensor name="helios_lidar" type="gpu_lidar">
       <gz_frame_id>${frame_prefix}laser_link</gz_frame_id>
@@ -132,6 +140,7 @@
       </camera>
     </sensor>
   </gazebo>
+  </xacro:if>
 
   <gazebo reference="imu_link">
     <sensor name="imu" type="imu">

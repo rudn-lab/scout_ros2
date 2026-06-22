@@ -33,12 +33,19 @@ def generate_launch_description():
             default_value="false",
             description="Run in Gazebo sim (enables sensors and uses sim time)",
         ),
+        DeclareLaunchArgument(
+            "sim_sensors",
+            default_value="true",
+            description="Spawn the rendering sensors (lidar + RGB/depth cameras) in "
+            "sim. Set false for RL-corrector training to drop the rendering cost.",
+        ),
     ]
 
     namespace = LaunchConfiguration("namespace")
     sim_reduction = LaunchConfiguration("sim_reduction")
     controller_file = LaunchConfiguration("controller_file")
     sim = LaunchConfiguration("sim")
+    sim_sensors = LaunchConfiguration("sim_sensors")
 
     model_name = "scout_mini.xacro"
     robot_description_content = Command(
@@ -56,6 +63,8 @@ def generate_launch_description():
             controller_file,
             " sim:=",
             sim,
+            " sim_sensors:=",
+            sim_sensors,
         ]
     )
     robot_description = ParameterValue(robot_description_content, value_type=str)
